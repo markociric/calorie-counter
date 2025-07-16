@@ -2,25 +2,16 @@ import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing-module';
+import { provideCharts } from 'ng2-charts';
 import { App } from './app';
-import { LoginComponent } from './pages/login/login';
+import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard';
+import { RegisterComponent } from './pages/register/register';
 
 @NgModule({
-  declarations: [
-    App,
-    DashboardComponent,
-    LoginComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-
-  ],
-  providers: [
-    provideBrowserGlobalErrorListeners()
-  ],
-  bootstrap: [App]
+  declarations: [App, DashboardComponent, LoginComponent, RegisterComponent],
+  imports: [BrowserModule, AppRoutingModule, FormsModule],
+  providers: [provideBrowserGlobalErrorListeners(), provideCharts()],
+  bootstrap: [App],
 })
-export class AppModule { }
+export class AppModule {}

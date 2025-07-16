@@ -1,0 +1,113 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eae866, #46c843);
+}
+
+.calorie-goal {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.calorie-goal input {
+  width: 180px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.calorie-goal button {
+  padding: 10px 20px;
+  border: none;
+  background: #1976d2;
+  color: #fff;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.calorie-goal button:hover {
+  background: #155fa0;
+}
+
+.goal-display {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+/* ——— Add Food dugme ——— */
+.add-food {
+  margin-bottom: 16px;
+}
+
+.add-food button {
+  padding: 10px 24px;
+  border: none;
+  background: #46c843;
+  color: white;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.add-food button:hover {
+  background: #3fa63a;
+}
+
+/* ——— Forma za unos namirnice ——— */
+.add-food-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.add-food-form input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.add-food-form button {
+  padding: 8px 16px;
+  border: none;
+  background: #1976d2;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.add-food-form button:hover {
+  background: #155fa0;
+}
+
+.food-list {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 24px;
+}
+
+.food-list h3 {
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #333;
+  text-align: left;
+}
+
+.food-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 16px;
+}
