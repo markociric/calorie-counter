@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -11,14 +14,33 @@ export class LoginComponent {
   username: string = '';
   password: string = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService    // injektujemo AuthService
+  ) {}
 
   login() {
     if (!this.username.trim() || !this.password.trim()) {
-      alert('Please enter both username and password.');
-    } else {
-      this.router.navigate(['/dashboard']);
+      alert('Molim unesite korisničko ime i lozinku.');
+      return;
     }
+
+    // Pozivamo AuthService.login() → HttpClient.post() → prolazi kroz interceptor
+    this.authService
+      .login({ username: this.username, password: this.password })
+      .pipe(
+        catchError(err => {
+          alert('Login neuspešan');
+          return of(null);
+        })
+      )
+      .subscribe(res => {
+        if (res) {
+          // sačuvamo tokene u localStorage, da bi ih interceptor kasnije dodavao
+          this.authService.saveTokens(res.accessToken, res.refreshToken);
+          this.router.navigate(['/dashboard']);
+        }
+      });
   }
 
   goToRegister() {
