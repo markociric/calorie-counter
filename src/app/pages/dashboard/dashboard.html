@@ -1,8 +1,9 @@
 <head>
   <title>Dashboard</title>
+  <pre>{{ foods | json }}</pre>
 </head>
 <div class="dashboard-container">
-  <!-- Unos cilja -->
+  <!-- Unos cilja ostaje isti -->
   <div class="calorie-goal">
     <input
       type="number"
@@ -12,7 +13,6 @@
     <button (click)="setCalorieGoal()">Set Goal</button>
   </div>
 
-  <!-- Prikaz napretka -->
   <p *ngIf="goal !== null" class="goal-display">
     {{ dailyIntake }} / {{ goal }} kcal
   </p>
@@ -24,19 +24,48 @@
     </button>
   </div>
 
-  <!-- Forma za unos hrane -->
+  <!-- Nova forma za unos: combobox + grami -->
   <div *ngIf="showAddForm" class="add-food-form">
-    <input type="text" [(ngModel)]="foodName" placeholder="Food name" />
-    <input type="number" [(ngModel)]="foodCalories" placeholder="Calories" />
-    <button (click)="addFood()">Add</button>
+    <select [(ngModel)]="selectedFood" name="foodSelect">
+      <option [ngValue]="null" disabled selected>Select food</option>
+      <option *ngFor="let f of foods" [ngValue]="f">{{ f.name }}</option>
+    </select>
+
+    <input
+      type="number"
+      [(ngModel)]="foodGrams"
+      name="foodGrams"
+      placeholder="Grams"
+    />
+
+    <button type="button" (click)="addFood()">Add</button>
   </div>
 
-  <!-- Lista unetih namirnica -->
+  <!-- Lista unetih namirnica, sada pokazuje grame -->
   <div *ngIf="enteredFoods.length" class="food-list">
-    <h3>Your food</h3>
-    <div *ngFor="let food of enteredFoods" class="food-row">
-      <span>{{ food.name }}</span>
-      <span>{{ food.calories }} kcal</span>
+    <h3>Your entries</h3>
+    <div *ngFor="let e of enteredFoods; let i = index" class="food-row">
+      <span>{{ e.name }} ({{ e.grams }} g)</span>
+      <span>{{ e.kcal }} kcal</span>
+
+      <!-- 1) Delete dugme -->
+      <button
+        class="delete-btn"
+        (click)="startDelete(i)"
+        [disabled]="deletingIndex!==null"
+      >
+        Delete
+      </button>
+
+      <!-- 2) Date‑picker ako je u toku brisanje tog reda -->
+      <div *ngIf="deletingIndex===i" class="delete-picker">
+        <input
+          type="date"
+          [(ngModel)]="deleteDate"
+          (change)="confirmDelete()"
+        />
+        <button (click)="cancelDelete()">✕</button>
+      </div>
     </div>
   </div>
 </div>

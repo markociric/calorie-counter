@@ -19,7 +19,7 @@ interface LoginResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly API_URL = 'http://localhost:8080/auth';
@@ -30,8 +30,10 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${this.API_URL}/login`, data);
   }
 
-  register(data: RegisterRequest): Observable<any> {
-    return this.http.post<any>(`${this.API_URL}/register`, data);
+  register(data: { username: string; password: string }): Observable<string> {
+    return this.http.post(`${this.API_URL}/register`, data, {
+      responseType: 'text',
+    });
   }
 
   saveTokens(accessToken: string, refreshToken: string): void {
