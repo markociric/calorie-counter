@@ -5,7 +5,7 @@
  */
 export interface FoodEntryRequest {
   /** Name of the food item */
-  name: string;
+  foodName: string;
   /** Amount in grams */
   grams: number;
 }

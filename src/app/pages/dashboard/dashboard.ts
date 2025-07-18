@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FoodService } from '../../services/food.service';
 import { FoodItem } from '../../models/food-item';
+import { FoodEntryRequest, DailyEntryResponse } from '../../models/food-entry';
+
 
 @Component({
   selector: 'app-dashboard',
@@ -26,15 +28,32 @@ export class DashboardComponent implements OnInit {
   deleteDate: string | null = null;
   constructor(private foodService: FoodService) {}
 
-  ngOnInit() {
-    this.foodService.readFoodItems().subscribe({
+ngOnInit() {
+  // …postojeći readFoodItems()…
+  this.foodService.readFoodItems().subscribe({
       next: (items) => {
         console.log('Loaded foods:', items);
         this.foods = items;
       },
       error: (err) => console.error('readFoodItems error', err),
     });
-  }
+
+  this.foodService.readDailyEntries().subscribe({
+    next: entries => {
+      this.enteredFoods = entries.map(e => ({
+        name: e.name,
+        grams: e.grams,
+        kcal: e.calories
+      }));
+      // totalCalories je u poslednjem entry-ju
+      this.dailyIntake = entries.length
+        ? entries[entries.length - 1].totalCalories
+        : 0;
+    },
+    error: err => console.error('readDailyEntries error', err)
+  });
+}
+
 
   setCalorieGoal() {
     if (this.goalInput && this.goalInput > 0) {
@@ -52,38 +71,52 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  addFood() {
-    if (!this.goal) {
-      alert('Please set a daily goal first!');
-      return;
-    }
-    if (!this.selectedFood) {
-      alert('Please select a food.');
-      return;
-    }
-    if (!this.foodGrams || this.foodGrams <= 0) {
-      alert('Please enter a valid gram amount.');
-      return;
-    }
-
-    // preračunaj stvarne kcal: (caloriesPer100g * grams) / 100
-    const kcal = (this.selectedFood.caloriesPer100g * this.foodGrams) / 100;
-
-    // dodaš u listu
-    this.enteredFoods.push({
-      name: this.selectedFood.name,
-      grams: this.foodGrams,
-      kcal: Math.round(kcal), // zaokruži
-    });
-
-    // ažuriraj progress
-    this.dailyIntake += kcal;
-    this.toggleAddForm();
-
-    if (this.dailyIntake > this.goal!) {
-      alert('⚠️ You have exceeded your daily calorie goal!');
-    }
+addFood() {
+  if (!this.goal) {
+    alert('Please set a daily goal first!');
+    return;
   }
+  if (!this.selectedFood) {
+    alert('Please select a food.');
+    return;
+  }
+  if (!this.foodGrams || this.foodGrams <= 0) {
+    alert('Please enter a valid gram amount.');
+    return;
+  }
+
+  // Sastavi payload za backend
+  const req: FoodEntryRequest = {
+    foodName: this.selectedFood.name,
+    grams: this.foodGrams
+  };
+
+  // Pošalji zahtev i sačekaj odgovor
+  this.foodService.createEntry(req).subscribe({
+    next: (resp: DailyEntryResponse) => {
+      // Ubaci novi entry u listu
+      this.enteredFoods.push({
+        name: resp.name,
+        grams: resp.grams,
+        kcal: resp.calories
+      });
+      // Ažuriraj ukupni unos iz totalCalories iz odgovora
+      this.dailyIntake = resp.totalCalories;
+      // Sakrij formu i resetuj selekciju
+      this.toggleAddForm();
+      // Upozori ako smo prekoračili cilj
+      if (this.dailyIntake > this.goal!) {
+        alert('⚠️ You have exceeded your daily calorie goal!');
+      }
+    },
+    error: err => {
+      console.error('Error creating food entry', err);
+      alert('Failed to add entry. Please try again.');
+    }
+  });
+}
+
+
   startDelete(i: number) {
     this.deletingIndex = i;
     this.deleteDate = null;
