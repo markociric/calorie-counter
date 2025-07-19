@@ -1,0 +1,20 @@
+<div class="admin-container">
+  <h2>Admin Dashboard</h2>
+
+  <div class="table-wrapper">
+    <table class="users-table">
+      <thead>
+    <tr>
+      <th>Korisničko ime</th>
+      <th>Rola</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let user of users">
+      <td>{{ user.username }}</td>
+      <td>{{ user.role }}</td>
+    </tr>
+  </tbody>
+    </table>
+  </div>
+</div>

@@ -11,15 +11,19 @@ import { of } from 'rxjs';
   styleUrls: ['./login.css'],
 })
 export class LoginComponent {
+  
   username: string = '';
   password: string = '';
-
+  passwordVisible = false;
   constructor(
     private router: Router,
     private authService: AuthService    // injektujemo AuthService
   ) {}
 
   login() {
+    console.log('Username:', this.username);
+console.log('Password:', this.password);
+
     if (!this.username.trim() || !this.password.trim()) {
       alert('Molim unesite korisničko ime i lozinku.');
       return;
@@ -35,12 +39,15 @@ export class LoginComponent {
         })
       )
       .subscribe(res => {
-        if (res) {
-          // sačuvamo tokene u localStorage, da bi ih interceptor kasnije dodavao
-          this.authService.saveTokens(res.accessToken, res.refreshToken);
-          this.router.navigate(['/dashboard']);
-        }
-      });
+  if (!res) return;
+  this.authService.saveTokens(res.accessToken, res.refreshToken);
+  localStorage.setItem('userRole', res.role);
+  if (res.role === 'ROLE_ADMIN') {
+    this.router.navigate(['/admin']);
+  } else {
+    this.router.navigate(['/dashboard']);
+  }
+});
   }
 
   goToRegister() {

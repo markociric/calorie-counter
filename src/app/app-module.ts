@@ -10,13 +10,15 @@ import { DashboardComponent }                     from './pages/dashboard/dashbo
 import { RegisterComponent }                      from './pages/register/register';
 import { HttpClientModule, HTTP_INTERCEPTORS }    from '@angular/common/http';
 import { AuthInterceptor }                        from './interceptors/auth-interceptor';
+import { AdminComponent }                         from './pages/admin/admin';
 
 @NgModule({
   declarations: [
     App,
     DashboardComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,

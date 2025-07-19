@@ -7,24 +7,28 @@ import {
   HttpRequest
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AuthService } from '../services/auth.service'; // prilagodi putanju ako treba
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.authService.getAccessToken();
+    // 1) Ako je login ili register, ne dodajemo token
+    if (req.url.endsWith('/auth/login') || req.url.endsWith('/auth/register')) {
+      return next.handle(req);
+    }
 
+    // 2) Inače, dohvatimo token i, ako postoji, setujemo header
+    const token = this.authService.getAccessToken();
     if (token) {
       const authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
+        setHeaders: { Authorization: `Bearer ${token}` }
       });
       return next.handle(authReq);
     }
 
+    // 3) Ako nema tokena, samo prosledi originalni request
     return next.handle(req);
   }
 }

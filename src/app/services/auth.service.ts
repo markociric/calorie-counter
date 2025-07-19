@@ -13,6 +13,7 @@ interface RegisterRequest {
 }
 
 interface LoginResponse {
+  role: string; 
   accessToken: string;
   refreshToken: string;
   refreshTokenExpiryDate: string;
