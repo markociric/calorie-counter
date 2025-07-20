@@ -1,6 +1,8 @@
+// src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 interface LoginRequest {
   username: string;
@@ -13,10 +15,16 @@ interface RegisterRequest {
 }
 
 interface LoginResponse {
-  role: string; 
   accessToken: string;
   refreshToken: string;
   refreshTokenExpiryDate: string;
+}
+
+interface DecodedToken {
+  sub: string;
+  exp: number;
+  iat: number;
+  authorities?: string[];  // ili 'roles'
 }
 
 @Injectable({
@@ -31,10 +39,8 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${this.API_URL}/login`, data);
   }
 
-  register(data: { username: string; password: string }): Observable<string> {
-    return this.http.post(`${this.API_URL}/register`, data, {
-      responseType: 'text',
-    });
+  register(data: RegisterRequest): Observable<string> {
+    return this.http.post(`${this.API_URL}/register`, data, { responseType: 'text' });
   }
 
   saveTokens(accessToken: string, refreshToken: string): void {
@@ -56,6 +62,28 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getAccessToken();
+    const token = this.getAccessToken();
+    if (!token) return false;
+    const decoded: DecodedToken = jwtDecode(token);
+    return decoded.exp * 1000 > Date.now();
+  }
+
+  /**
+   * Extracts user role(s) from the JWT access token
+   */
+  getUserRoles(): string[] {
+    const token = this.getAccessToken();
+    if (!token) return [];
+    const decoded: any = jwtDecode<DecodedToken>(token);
+    // adjust property name based on your JWT claim
+    return decoded.authorities || decoded.roles || [];
+  }
+
+  /**
+   * Returns single role or null
+   */
+  getUserRole(): string | null {
+    const roles = this.getUserRoles();
+    return roles.length ? roles[0] : null;
   }
 }

@@ -1,8 +1,8 @@
+// src/app/components/dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FoodService } from '../../services/food.service';
 import { FoodItem } from '../../models/food-item';
-import { FoodEntryRequest, DailyEntryResponse } from '../../models/food-entry';
-
+import { FoodEntryRequest, DailyEntryResponse, FoodEntryDto } from '../../models/food-entry';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,53 +13,48 @@ import { FoodEntryRequest, DailyEntryResponse } from '../../models/food-entry';
 export class DashboardComponent implements OnInit {
   goalInput: number | null = null;
   goal: number | null = null;
+
+  // Čuvamo ceo dnevni unos i pojedinačne unose za prikaz
+  dailyEntry: DailyEntryResponse | null = null;
+  enteredFoods: FoodEntryDto[] = [];
   dailyIntake: number = 0;
 
   showAddForm = false;
-
-  // sada dohvaćamo listu iz back‑enda
   foods: FoodItem[] = [];
   selectedFood: FoodItem | null = null;
   foodGrams: number | null = null;
 
-  enteredFoods: { name: string; grams: number; kcal: number }[] = [];
-
-  deletingIndex: number | null = null;
+  // Za delete preko query-param
   deleteDate: string | null = null;
+
   constructor(private foodService: FoodService) {}
 
-ngOnInit() {
-  // …postojeći readFoodItems()…
-  this.foodService.readFoodItems().subscribe({
-      next: (items) => {
-        console.log('Loaded foods:', items);
-        this.foods = items;
-      },
-      error: (err) => console.error('readFoodItems error', err),
+  ngOnInit() {
+    // Učitamo statičku listu FoodItem-ova (da imamo kalorije po 100g)
+    this.foodService.readFoodItems().subscribe({
+      next: items => this.foods = items,
+      error: err => console.error('readFoodItems error', err)
     });
 
-  this.foodService.readDailyEntries().subscribe({
-    next: entries => {
-      this.enteredFoods = entries.map(e => ({
-        name: e.name,
-        grams: e.grams,
-        kcal: e.calories
-      }));
-      // totalCalories je u poslednjem entry-ju
-      this.dailyIntake = entries.length
-        ? entries[entries.length - 1].totalCalories
-        : 0;
-    },
-    error: err => console.error('readDailyEntries error', err)
-  });
-}
-
+    // Učitamo sve dnevne zapise i uzmemo onaj najnoviji
+    this.foodService.readDailyEntries().subscribe({
+      next: (entries: DailyEntryResponse[]) => {
+        if (entries.length) {
+          this.dailyEntry = entries[entries.length - 1];
+          this.updateViewFromEntry();
+        }
+      },
+      error: err => console.error('readDailyEntries error', err)
+    });
+  }
 
   setCalorieGoal() {
-    if (this.goalInput && this.goalInput > 0) {
+    if (this.goalInput! > 0) {
       this.goal = this.goalInput;
-      this.dailyIntake = 0;
+      // Resetujemo lokalni prikaz unosa
+      this.dailyEntry = null;
       this.enteredFoods = [];
+      this.dailyIntake = 0;
     }
   }
 
@@ -71,81 +66,71 @@ ngOnInit() {
     }
   }
 
-addFood() {
-  if (!this.goal) {
-    alert('Please set a daily goal first!');
-    return;
-  }
-  if (!this.selectedFood) {
-    alert('Please select a food.');
-    return;
-  }
-  if (!this.foodGrams || this.foodGrams <= 0) {
-    alert('Please enter a valid gram amount.');
-    return;
-  }
-
-  // Sastavi payload za backend
-  const req: FoodEntryRequest = {
-    foodName: this.selectedFood.name,
-    grams: this.foodGrams
-  };
-
-  // Pošalji zahtev i sačekaj odgovor
-  this.foodService.createEntry(req).subscribe({
-    next: (resp: DailyEntryResponse) => {
-      // Ubaci novi entry u listu
-      this.enteredFoods.push({
-        name: resp.name,
-        grams: resp.grams,
-        kcal: resp.calories
-      });
-      // Ažuriraj ukupni unos iz totalCalories iz odgovora
-      this.dailyIntake = resp.totalCalories;
-      // Sakrij formu i resetuj selekciju
-      this.toggleAddForm();
-      // Upozori ako smo prekoračili cilj
-      if (this.dailyIntake > this.goal!) {
-        alert('⚠️ You have exceeded your daily calorie goal!');
-      }
-    },
-    error: err => {
-      console.error('Error creating food entry', err);
-      alert('Failed to add entry. Please try again.');
+  addFood() {
+    if (!this.goal) {
+      alert('Please set a daily goal first!');
+      return;
     }
-  });
-}
+    if (!this.selectedFood || !this.foodGrams! || this.foodGrams! <= 0) {
+      alert('Please select a food and enter valid grams.');
+      return;
+    }
 
+    const req: FoodEntryRequest = {
+      foodName: this.selectedFood.name,
+      grams: this.foodGrams!
+    };
 
-  startDelete(i: number) {
-    this.deletingIndex = i;
-    this.deleteDate = null;
+    this.foodService.createEntry(req).subscribe({
+      next: (resp: DailyEntryResponse) => {
+        this.dailyEntry = resp;
+        this.updateViewFromEntry();
+        this.toggleAddForm();
+
+        if (resp.totalCalories > this.goal!) {
+          alert('⚠️ You have exceeded your daily calorie goal!');
+        }
+      },
+      error: err => {
+        console.error('Error creating food entry', err);
+        alert('Failed to add entry. Please try again.');
+      }
+    });
   }
 
-  /** Kada korisnik izabere datum, obriši entry i zatvori picker */
+  startDelete() {
+    if (!this.dailyEntry) return;
+    this.deleteDate = this.dailyEntry.date;
+  }
+
   confirmDelete() {
-    if (this.deletingIndex === null || !this.deleteDate) return;
+    if (!this.deleteDate) return;
 
-    // Ovdje možeš poslati i datum na backend ako budeš želeo…
-    console.log(
-      `Deleting entry`,
-      this.enteredFoods[this.deletingIndex],
-      `on`,
-      this.deleteDate
-    );
+    this.foodService.deleteEntry(this.deleteDate).subscribe({
+      next: () => {
+        // Izbriši lokalni prikaz
+        this.dailyEntry = null;
+        this.enteredFoods = [];
+        this.dailyIntake = 0;
+        this.deleteDate = null;
+      },
+      error: err => {
+        console.error('Delete error', err);
+        alert('Failed to delete entry.');
+      }
+    });
+  }
 
-    // Ukloni iz lokalne liste
-    this.enteredFoods.splice(this.deletingIndex, 1);
-    this.dailyIntake = this.enteredFoods.reduce((sum, e) => sum + e.kcal, 0);
-
-    // Reset stanja
-    this.deletingIndex = null;
+  cancelDelete() {
     this.deleteDate = null;
   }
 
-  /** Ako korisnik odustane */
-  cancelDelete() {
-    this.deletingIndex = null;
-    this.deleteDate = null;
+  /** Ažurira listu enteredFoods i ukupne kalorije iz dailyEntry */
+  private updateViewFromEntry() {
+    if (!this.dailyEntry) return;
+
+    // Direkno preuzimamo stavke iz DTO-a
+    this.enteredFoods = this.dailyEntry.entries;
+    this.dailyIntake = this.dailyEntry.totalCalories;
   }
 }

@@ -10,18 +10,22 @@ export interface FoodEntryRequest {
   grams: number;
 }
 
-/**
- * Response payload representing a saved daily entry.
- */
-export interface DailyEntryResponse {
-  /** Unique identifier of the entry */
-  id: number;
-  /** Name of the food item */
-  name: string;
-  /** Amount in grams */
+/** Jedan unos hrane unutar dnevnika */
+export interface FoodEntryDto {
+  /** Naziv namirnice */
+  foodName: string;
+  /** Količina u gramima */
   grams: number;
-  /** Calculated calories for this entry */
-  calories: number;
-  /** Total calories consumed today (after this entry) */
+}
+
+/** Odgovor za POST / PUT dnevnog unosa */
+export interface DailyEntryResponse {
+  /** Primarni ključ dnevnika */
+  id: number;
+  /** Datum (ISO string ili Date) */
+  date: string;
+  /** Ukupno unesene kalorije tog dana */
   totalCalories: number;
+  /** Lista unetih namirnica */
+  entries: FoodEntryDto[];
 }

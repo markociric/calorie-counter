@@ -1,3 +1,4 @@
+// src/app/pages/login/login.component.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -11,25 +12,21 @@ import { of } from 'rxjs';
   styleUrls: ['./login.css'],
 })
 export class LoginComponent {
-  
-  username: string = '';
-  password: string = '';
+  username = '';
+  password = '';
   passwordVisible = false;
+
   constructor(
     private router: Router,
-    private authService: AuthService    // injektujemo AuthService
+    private authService: AuthService
   ) {}
 
   login() {
-    console.log('Username:', this.username);
-console.log('Password:', this.password);
-
     if (!this.username.trim() || !this.password.trim()) {
       alert('Molim unesite korisničko ime i lozinku.');
       return;
     }
 
-    // Pozivamo AuthService.login() → HttpClient.post() → prolazi kroz interceptor
     this.authService
       .login({ username: this.username, password: this.password })
       .pipe(
@@ -39,15 +36,22 @@ console.log('Password:', this.password);
         })
       )
       .subscribe(res => {
-  if (!res) return;
-  this.authService.saveTokens(res.accessToken, res.refreshToken);
-  localStorage.setItem('userRole', res.role);
-  if (res.role === 'ROLE_ADMIN') {
-    this.router.navigate(['/admin']);
-  } else {
-    this.router.navigate(['/dashboard']);
-  }
-});
+        if (!res) return;
+
+        // Sačuvaj tokene
+        this.authService.saveTokens(res.accessToken, res.refreshToken);
+
+        // Dohvati ulogu iz access tokena
+        const role = this.authService.getUserRole();
+        console.log('User role from token:', role);
+
+        // Preusmeri na osnovu uloge
+        if (role === 'ROLE_ADMIN') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
+      });
   }
 
   goToRegister() {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { FoodItem } from '../models/food-item';
@@ -43,10 +43,11 @@ export class FoodService {
   /**
    * DELETE /food/deleteEntry/{id} -> void
    */
-  //popraviti jer ne ide po id nego po datumu
-  deleteEntry(id: number): Observable<void> {
+  deleteEntry(date: string): Observable<void> {
+    const params = new HttpParams().set('date', date);
     return this.http.delete<void>(
-      `${this.baseUrl}/daily-entry/${id}`
+      `${this.baseUrl}/daily-entry`,
+      { params }
     );
   }
 }
