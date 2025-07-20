@@ -15,6 +15,6 @@ export class UserService {
 
   /** Dohvata sve korisnike iz backend-a */
  getAllUsers(): Observable<User[]> {
-  return this.http.get<User[]>(`${this.API_URL}/auth/readUsers`);
+  return this.http.get<User[]>(`${this.API_URL}/auth/users`);
 }
 }

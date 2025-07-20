@@ -18,7 +18,7 @@ export class FoodService {
    * GET  /food/readFoodItems -> List<FoodItem>
    */
   readFoodItems(): Observable<FoodItem[]> {
-    return this.http.get<FoodItem[]>(`${this.baseUrl}/readFoodItems`);
+    return this.http.get<FoodItem[]>(`${this.baseUrl}/food-items`);
   }
 
   /**
@@ -26,7 +26,7 @@ export class FoodService {
    */
   createEntry(req: FoodEntryRequest): Observable<DailyEntryResponse> {
     return this.http.post<DailyEntryResponse>(
-      `${this.baseUrl}/createEntry`,
+      `${this.baseUrl}/food-entry`,
       req
     );
   }
@@ -36,7 +36,7 @@ export class FoodService {
    */
   readDailyEntries(): Observable<DailyEntryResponse[]> {
     return this.http.get<DailyEntryResponse[]>(
-      `${this.baseUrl}/readDailyEntries`
+      `${this.baseUrl}/daily-entries`
     );
   }
 
@@ -46,7 +46,7 @@ export class FoodService {
   //popraviti jer ne ide po id nego po datumu
   deleteEntry(id: number): Observable<void> {
     return this.http.delete<void>(
-      `${this.baseUrl}/deleteEntry/${id}`
+      `${this.baseUrl}/daily-entry/${id}`
     );
   }
 }
