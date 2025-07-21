@@ -1,6 +1,8 @@
 // src/app/components/dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FoodService } from '../../services/food.service';
+import { AuthService } from '../../services/auth.service';
 import { FoodItem } from '../../models/food-item';
 import { FoodEntryRequest, DailyEntryResponse, FoodEntryDto } from '../../models/food-entry';
 
@@ -14,7 +16,6 @@ export class DashboardComponent implements OnInit {
   goalInput: number | null = null;
   goal: number | null = null;
 
-  // Čuvamo ceo dnevni unos i pojedinačne unose za prikaz
   dailyEntry: DailyEntryResponse | null = null;
   enteredFoods: FoodEntryDto[] = [];
   dailyIntake: number = 0;
@@ -24,19 +25,20 @@ export class DashboardComponent implements OnInit {
   selectedFood: FoodItem | null = null;
   foodGrams: number | null = null;
 
-  // Za delete preko query-param
   deleteDate: string | null = null;
 
-  constructor(private foodService: FoodService) {}
+  constructor(
+    private foodService: FoodService,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
-    // Učitamo statičku listu FoodItem-ova (da imamo kalorije po 100g)
     this.foodService.readFoodItems().subscribe({
       next: items => this.foods = items,
       error: err => console.error('readFoodItems error', err)
     });
 
-    // Učitamo sve dnevne zapise i uzmemo onaj najnoviji
     this.foodService.readDailyEntries().subscribe({
       next: (entries: DailyEntryResponse[]) => {
         if (entries.length) {
@@ -48,10 +50,17 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  confirmLogout(): void {
+    const ok = window.confirm('Da li ste sigurni da želite da se odjavite?');
+    if (ok) {
+      this.authService.logout();
+      this.router.navigate(['/unos']);
+    }
+  }
+
   setCalorieGoal() {
     if (this.goalInput! > 0) {
       this.goal = this.goalInput;
-      // Resetujemo lokalni prikaz unosa
       this.dailyEntry = null;
       this.enteredFoods = [];
       this.dailyIntake = 0;
@@ -108,7 +117,6 @@ export class DashboardComponent implements OnInit {
 
     this.foodService.deleteEntry(this.deleteDate).subscribe({
       next: () => {
-        // Izbriši lokalni prikaz
         this.dailyEntry = null;
         this.enteredFoods = [];
         this.dailyIntake = 0;
@@ -125,11 +133,8 @@ export class DashboardComponent implements OnInit {
     this.deleteDate = null;
   }
 
-  /** Ažurira listu enteredFoods i ukupne kalorije iz dailyEntry */
   private updateViewFromEntry() {
     if (!this.dailyEntry) return;
-
-    // Direkno preuzimamo stavke iz DTO-a
     this.enteredFoods = this.dailyEntry.entries;
     this.dailyIntake = this.dailyEntry.totalCalories;
   }

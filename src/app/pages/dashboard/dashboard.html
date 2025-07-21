@@ -1,4 +1,10 @@
 <!-- src/app/components/dashboard.html -->
+<nav class="top-menu">
+  <a class="menu-item left" routerLink="/istorija">Istorija</a>
+  <a class="menu-item center" routerLink="/dashboard">Unos</a>
+  <button class="menu-item right" (click)="confirmLogout()">Logout</button>
+</nav>
+
 <div class="dashboard-container">
   <!-- Unos cilja -->
   <div class="calorie-goal">
