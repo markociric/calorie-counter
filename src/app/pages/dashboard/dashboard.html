@@ -1,11 +1,12 @@
 <!-- src/app/components/dashboard.html -->
-<nav class="top-menu">
-  <a class="menu-item left" routerLink="/istorija">Istorija</a>
+
+
+<div class="dashboard-container">
+ <nav class="top-menu">
+  <a class="menu-item left" routerLink="/history">Istorija</a>
   <a class="menu-item center" routerLink="/dashboard">Unos</a>
   <button class="menu-item right" (click)="confirmLogout()">Logout</button>
 </nav>
-
-<div class="dashboard-container">
   <!-- Unos cilja -->
   <div class="calorie-goal">
     <input type="number" [(ngModel)]="goalInput" placeholder="Enter daily calorie goal" />
@@ -14,7 +15,7 @@
 
   <!-- Prikaz unosa -->
   <p *ngIf="goal !== null" class="goal-display">
-    {{ dailyIntake }} / {{ goal }} kcal
+    {{ dailyIntake | number:'1.0-2'}} / {{ goal }} kcal
   </p>
 
   <!-- Dugme za dodavanje unosa -->

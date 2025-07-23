@@ -4,10 +4,17 @@ import { Observable } from 'rxjs';
 
 import { FoodItem } from '../models/food-item';
 import { FoodEntryRequest, DailyEntryResponse } from '../models/food-entry';
-
+export interface DailyEntry {
+  id: number;
+  date: string;      // ISO format: YYYY-MM-DD
+  calories: number;
+  // dodajte druge stanje po potrebi
+}
 @Injectable({
   providedIn: 'root',
 })
+
+
 export class FoodService {
   // @RequestMapping("/food") na backend-u
   private baseUrl = 'http://localhost:8080/food';

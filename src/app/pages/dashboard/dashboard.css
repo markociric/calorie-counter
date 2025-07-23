@@ -4,9 +4,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 20px;
+  padding: 0px 20px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #eae866, #46c843);
 }
 
 .calorie-goal {
@@ -167,7 +166,7 @@
   padding: 0.5rem 1rem;
   background: #f8f8f8;
   border-bottom: 1px solid #ddd;
-  margin: 80px 0 1.5rem; /* umesto 40px gore, sad 80px */
+  margin: 10px 0 1.5rem; /* umesto 40px gore, sad 80px */
 }
 
 .top-menu .menu-item {

@@ -1,0 +1,20 @@
+<div class="admin-container">
+  <h2>Daily Entries History</h2>
+
+  <div class="table-wrapper">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Total Calories</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of entries">
+          <td>{{ e.date | date:'mediumDate' }}</td>
+        <td>{{ e.totalCalories | number:'1.0-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

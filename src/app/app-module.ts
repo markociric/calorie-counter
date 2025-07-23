@@ -11,6 +11,7 @@ import { RegisterComponent }                      from './pages/register/registe
 import { HttpClientModule, HTTP_INTERCEPTORS }    from '@angular/common/http';
 import { AuthInterceptor }                        from './interceptors/auth-interceptor';
 import { AdminComponent }                         from './pages/admin/admin';
+import { HistoryComponent }                       from './pages/history/history';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { AdminComponent }                         from './pages/admin/admin';
     DashboardComponent,
     LoginComponent,
     RegisterComponent,
-    AdminComponent
+    AdminComponent,
+    HistoryComponent
   ],
   imports: [
     BrowserModule,
